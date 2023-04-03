@@ -114,8 +114,6 @@ function validateForm(){
   nameInputElement.addEventListener("input", validateForm);
   textInputElement.addEventListener("input", validateForm);
 
-  
-  
 // function addComment(){
 //   const oldListHtml = listElement.innerHTML;
 //   listElement.innerHTML = oldListHtml +  
@@ -143,8 +141,6 @@ function validateForm(){
 //   buttonDisabled();
 // }
 
-
-
 buttonDeleteElement.addEventListener("click", (event)=>{
   // const lastComment = listElement.innerHTML.lastIndexOf('<li class="comment">');
   // listElement.innerHTML = listElement.innerHTML.slice(0, lastComment);
@@ -164,9 +160,6 @@ const initEditButtons = () => {
       event.stopPropagation(); 
       if (comment.isEdit) { 
         const newTextElement = document.querySelector('#new-text')
-        // newTextElement.addEventListener('click', (event) => {
-        //   event.stopPropagation()
-        // }) 
         const newText = newTextElement.value;
         comment.text = newText;
         commentBodyElements[index].innerHTML = `<div class="comment-text">
@@ -174,21 +167,33 @@ const initEditButtons = () => {
                                                 </div>`;
         editButton.textContent = 'Редактировать';
         comment.isEdit = false;
-    
-      } else {
         
-        editButton.textContent = 'Сохранить';
-        comment.isEdit = true;
-        commentBodyElements[index].innerHTML = `<textarea
+        fetch('https://webdev-hw-api.vercel.app/api/v1/sergei-stepanov/comments', {
+          method: 'POST',
+          body: JSON.stringify(
+            {
+            text: newText
+                  .replaceAll('<', '&lt')
+                  .replaceAll('>', '&gt')
+                  .replaceAll('QUOTE_BEGIN', '<div class="quote">')
+                  .replaceAll('QUOTE_END', '</div>'),
+            name: comment.name,
+            })
+        }).then(() => {
+              fetchGet();
+              })
+                } else {                 
+                    editButton.textContent = 'Сохранить';
+                    comment.isEdit = true;
+                    commentBodyElements[index].innerHTML = `<textarea
                                                   type="textarea"
                                                   class="add-form-text"
                                                   id="new-text"
                                                   rows="4"
-                                                >${comment.text}</textarea>`
-                                                
-      };     
-    });
-  });
+                                                >${comment.text}</textarea>`;                                        
+                  };         
+              });  
+        }); 
 };
 
 const initEditComments = () => {
@@ -208,16 +213,13 @@ const initEditComments = () => {
        textInputElement.value = (`QUOTE_BEGIN ${comment.text}\n\n${comment.name} QUOTE_END`)
        .replaceAll('&lt','<')
        .replaceAll('&gt','>');
-
-// ---1. При нажатии на коммент он попадает в поле ввода. Оборачиваем в начало и конец.
+// ---1. При нажатии на коммент он попадает в поле ввода. Оборачиваем в "начало" и "конец".
 // ---2. Проверка безопасности. replaceAll
 })
   });
-  
 }
   
 // ----------------------- HW 10 -------------------------------
-let comments = [];
 // const comments = [ {
 //   name: 'Глеб Фокин',
 //   text: 'Это будет первый комментарий на этой странице',
@@ -236,12 +238,12 @@ let comments = [];
 // },
 // ];
 
-function fetchGetPromise() {
+function fetchGet() {
    fetch('https://webdev-hw-api.vercel.app/api/v1/sergei-stepanov/comments', {
       method: "GET",
     }).then((response) => {
-  const jsonPromise = response.json().then((responseData) => {
-    comments = responseData.comments.map((comment) => {
+          const jsonPromise = response.json().then((responseData) => {
+            comments = responseData.comments.map((comment) => {
                 const dateOptions = { 
                   day: 'numeric', 
                   month: 'numeric', 
@@ -257,12 +259,12 @@ function fetchGetPromise() {
                   isEdit: false,
                 }
               })
-    renderComments();
+      renderComments();
+    } )
   })
-})
 };
 
-fetchGetPromise();
+fetchGet();
 
 const initLikeButton = () => {
   const likeButtonElements = document.querySelectorAll('.like-button');
@@ -278,8 +280,7 @@ const initLikeButton = () => {
      }  else {
       comments[index].likeButton = '-active-like';
      comments[index].likeCounter++;
-     }
-     
+     } 
      renderComments();     
   }) 
     }
@@ -295,7 +296,6 @@ const initLikeButton = () => {
 //     .replaceAll('>', '&gt')
 //     .replaceAll('QUOTE_BEGIN', '<div class="quote">')
 //     .replaceAll('QUOTE_END', '</div>'),
-
 //     date: date(),
 //     likeCounter: '0',
 //     likeButton: '',
@@ -336,8 +336,7 @@ const renderComments = () => {
       initEditComments();
       initEditButtons();
   }
-
-buttonElement.addEventListener("click", () => {
+function fetchPost() {
   fetch('https://webdev-hw-api.vercel.app/api/v1/sergei-stepanov/comments', {
     method: 'POST',
     body: JSON.stringify(
@@ -352,11 +351,31 @@ buttonElement.addEventListener("click", () => {
                               .replaceAll('>', '&gt'),
        })
   })
-  .then(() => {
-    fetchGetPromise()
+.then(() => {
+    fetchGet();
     })
+  }
+buttonElement.addEventListener("click", () => {
+  fetchPost();
+  // fetch('https://webdev-hw-api.vercel.app/api/v1/sergei-stepanov/comments', {
+  //   method: 'POST',
+  //   body: JSON.stringify(
+  //     {
+  //      text: textInputElement.value
+  //                             .replaceAll('<', '&lt')
+  //                             .replaceAll('>', '&gt')
+  //                             .replaceAll('QUOTE_BEGIN', '<div class="quote">')
+  //                             .replaceAll('QUOTE_END', '</div>'),
+  //       name: nameInputElement.value
+  //                             .replaceAll('<', '&lt')
+  //                             .replaceAll('>', '&gt'),
+  //      })
+  // })
+  // .then(() => {
+  //   fetchGetPromise();
+  //   })
+  // })
   })
-
 document.addEventListener("keyup", (e)=> {
  if (e.code == 'Enter') {
   // addComment();
@@ -364,7 +383,6 @@ document.addEventListener("keyup", (e)=> {
   buttonElement.click();
  }
 });
-
 
 initEditComments();
 renderComments();
