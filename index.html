@@ -75,7 +75,7 @@
     const nameInputElement = document.getElementById('input-name');
     const textInputElement = document.getElementById('input-text');
     const buttonDeleteElement = document.getElementById('button-delete');
-    
+  
     
     // const date = () => {
     //   let currentDate = new Date();
@@ -220,6 +220,7 @@ const initEditComments = () => {
 }
   
 // ----------------------- HW 10 -------------------------------
+let comments = [];
 // const comments = [ {
 //   name: 'Глеб Фокин',
 //   text: 'Это будет первый комментарий на этой странице',
@@ -337,6 +338,7 @@ const renderComments = () => {
       initEditButtons();
   }
 function fetchPost() {
+  let isLoading = true;
   fetch('https://webdev-hw-api.vercel.app/api/v1/sergei-stepanov/comments', {
     method: 'POST',
     body: JSON.stringify(
@@ -354,6 +356,7 @@ function fetchPost() {
 .then(() => {
     fetchGet();
     })
+    isLoading = false;
   }
 buttonElement.addEventListener("click", () => {
   fetchPost();
