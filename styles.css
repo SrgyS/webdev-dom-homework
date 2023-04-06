@@ -145,5 +145,30 @@ body {
     border: none;
     padding: 10px 20px;
     margin-bottom: 20px;
+  }
+  .loading img{
+    width: 20px;
+    height: 20px;
+  }
+  .loading {
+    display: none;
+  }
 
+  @keyframes rotating {
+    from {
+      transform: rotate(0deg);
+    }
+    25% {
+      transform: rotate(30deg);;
+    }
+    75% {
+      transform: rotate(-30deg);;
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+
+  .-loading-like {
+    animation: rotating 2s linear infinite;
   }

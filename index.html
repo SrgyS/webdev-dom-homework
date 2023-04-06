@@ -43,7 +43,7 @@
           </div>
         </li> -->
       </ul>
-      <div class="add-form">
+      <div class="add-form" id="add-comment-form">
         <input
           type="text"
           class="add-form-name"
@@ -61,6 +61,9 @@
           <button class="add-form-button" id = "button-send">Написать</button>
         </div>
       </div>
+      <div class = "loading" id="loading-pic">
+        <img src="https://i.gifer.com/ZZ5H.gif" alt="loading...">
+      </div>
       <div class="add-form-row">
         <button class="add-form-button" id = "button-delete">Удалить последний комментарий</button>
       </div>
@@ -70,13 +73,23 @@
   <script>
 
 
-    const buttonElement = document.getElementById('button-send');
-    const listElement = document.getElementById('list');
-    const nameInputElement = document.getElementById('input-name');
-    const textInputElement = document.getElementById('input-text');
-    const buttonDeleteElement = document.getElementById('button-delete');
-  
-    
+  const buttonElement = document.getElementById('button-send');
+  const listElement = document.getElementById('list');
+  const nameInputElement = document.getElementById('input-name');
+  const textInputElement = document.getElementById('input-text');
+  const buttonDeleteElement = document.getElementById('button-delete');
+
+  const addCommentFormEl = document.getElementById('add-comment-form');
+  const loadingEl = document.getElementById('loading-pic');
+  const containerElement = document.querySelector('.container');
+
+  const showLoading = () => { 
+    if(isLoading) {
+      addCommentFormEl.style.display = 'none';
+      loadingEl.style.display = 'block';
+      } else return
+  }
+
     // const date = () => {
     //   let currentDate = new Date();
     //   let hours = currentDate.getHours();
@@ -101,15 +114,15 @@
 
     buttonDisabled();
 
-function validateForm(){
-  if (nameInputElement.value.trim() === '' || textInputElement.value.trim() === '') {
-    buttonElement.setAttribute('disabled', true);
+  function validateForm(){
+    if (nameInputElement.value.trim() === '' || textInputElement.value.trim() === '') {
+      buttonElement.setAttribute('disabled', true);
+    }
+    else {
+      buttonElement.removeAttribute('disabled');
+      buttonElement.style.backgroundColor = '';
+    }
   }
-  else {
-    buttonElement.removeAttribute('disabled');
-    buttonElement.style.backgroundColor = '';
-  }
-}
 
   nameInputElement.addEventListener("input", validateForm);
   textInputElement.addEventListener("input", validateForm);
@@ -152,7 +165,7 @@ event.stopPropagation();
 const initEditButtons = () => {
 
   editButtonElements = document.querySelectorAll('.edit-button');
-  const commentBodyElements = document.querySelectorAll('.comment-body');
+  const commentBodyElements = document.querySelectorAll('-body');
 
   editButtonElements.forEach((editButton, index) => {
     editButton.addEventListener('click', (event) => {
@@ -209,8 +222,8 @@ const initEditComments = () => {
   ) {
        return;
     }
-        comment.text = comment.text.replaceAll('<div class="quote">','').replaceAll('</div>','');
-       textInputElement.value = (`QUOTE_BEGIN ${comment.text}\n\n${comment.name} QUOTE_END`)
+      comment.text = comment.text.replaceAll('<div class="quote">','').replaceAll('</div>','');
+      textInputElement.value = (`QUOTE_BEGIN ${comment.text}\n\n${comment.name} QUOTE_END`)
        .replaceAll('&lt','<')
        .replaceAll('&gt','>');
 // ---1. При нажатии на коммент он попадает в поле ввода. Оборачиваем в "начало" и "конец".
@@ -240,33 +253,45 @@ let comments = [];
 // ];
 
 function fetchGet() {
+  if (comments.length === 0) {
+   containerElement.insertAdjacentHTML("afterbegin", "<span>Подождите, список загружается...</span>")
+  }
+
    fetch('https://webdev-hw-api.vercel.app/api/v1/sergei-stepanov/comments', {
       method: "GET",
     }).then((response) => {
-          const jsonPromise = response.json().then((responseData) => {
-            comments = responseData.comments.map((comment) => {
-                const dateOptions = { 
-                  day: 'numeric', 
-                  month: 'numeric', 
-                  year: 'numeric',
-                  hour: 'numeric', 
-                  minute: 'numeric'};
-                return {
-                  name: comment.author.name,
-                  date: new Date(comment.date).toLocaleString('ru-RU', dateOptions).replace(',', ''),
-                  text: comment.text,
-                  likeCounter: comment.likes,
-                  likeButton: '',
-                  isEdit: false,
-                }
-              })
-      renderComments();
+          return response.json()
+    })
+      .then((responseData) => {
+        comments = responseData.comments.map((comment) => {
+          const dateOptions = { 
+            day: 'numeric', 
+            month: 'numeric', 
+            year: 'numeric',
+            hour: 'numeric', 
+            minute: 'numeric',
+            };
+            return {
+              name: comment.author.name,
+              date: new Date(comment.date).toLocaleString('ru-RU', dateOptions).replace(',', ''),
+              text: comment.text,
+              likeCounter: comment.likes,
+              likeButton: comment.isLiked,
+              isEdit: false,
+            }
+          })
+          renderComments();
+          console.log(comments)
+          const span = containerElement.querySelector("span");
+          span.remove();
     } )
-  })
-};
+   
+  }
 
 fetchGet();
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+;
 const initLikeButton = () => {
   const likeButtonElements = document.querySelectorAll('.like-button');
   for (const likeButton of likeButtonElements) {
@@ -274,7 +299,9 @@ const initLikeButton = () => {
     likeButton.addEventListener('click', (event) => {
       event.stopPropagation(); 
       const index = likeButton.dataset.index;
-  
+      likeButton.classList.add('-loading-like');
+
+  delay(2000).then(()=>{
      if (comments[index].likeButton =='-active-like') {
       comments[index].likeButton = '';
       comments[index].likeCounter--;
@@ -283,9 +310,10 @@ const initLikeButton = () => {
      comments[index].likeCounter++;
      } 
      renderComments();     
-  }) 
+    }) 
     }
-  }
+    )
+  }}
 
 // const addComment = () => {
 //   comments.push( 
@@ -303,6 +331,7 @@ const initLikeButton = () => {
 //     isEdit: false,
 //   }) 
 //   }
+
 
 const renderComments = () => {
   const commentsHTML = comments.map((comment, index) => {
@@ -326,7 +355,6 @@ const renderComments = () => {
         </li>`;
       })
       .join('');
-      
 
       listElement.innerHTML = commentsHTML;
       nameInputElement.value = '';
@@ -336,9 +364,11 @@ const renderComments = () => {
       initLikeButton();
       initEditComments();
       initEditButtons();
+      addCommentFormEl.style.display = 'flex';
+      loadingEl.style.display = 'none';
   }
 function fetchPost() {
-  let isLoading = true;
+
   fetch('https://webdev-hw-api.vercel.app/api/v1/sergei-stepanov/comments', {
     method: 'POST',
     body: JSON.stringify(
@@ -353,12 +383,18 @@ function fetchPost() {
                               .replaceAll('>', '&gt'),
        })
   })
-.then(() => {
-    fetchGet();
-    })
-    isLoading = false;
+    .then(() => {
+      fetchGet();
+      }).then().finally(() => {
+      isLoading = false;
+      showLoading();
+      })
   }
+
 buttonElement.addEventListener("click", () => {
+  isLoading = true;
+  listElement.insertAdjacentHTML("beforeend", "<span>Комментарий загружается...</span>")
+  showLoading();
   fetchPost();
   // fetch('https://webdev-hw-api.vercel.app/api/v1/sergei-stepanov/comments', {
   //   method: 'POST',
