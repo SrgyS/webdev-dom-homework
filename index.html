@@ -84,10 +84,10 @@
   const containerElement = document.querySelector('.container');
 
   const showLoading = () => { 
-    if(isLoading) {
+    // if(isLoading) {
       addCommentFormEl.style.display = 'none';
       loadingEl.style.display = 'block';
-      } else return
+      // } else return
   }
 
     // const date = () => {
@@ -165,7 +165,7 @@ event.stopPropagation();
 const initEditButtons = () => {
 
   editButtonElements = document.querySelectorAll('.edit-button');
-  const commentBodyElements = document.querySelectorAll('-body');
+  const commentBodyElements = document.querySelectorAll('.comment-body');
 
   editButtonElements.forEach((editButton, index) => {
     editButton.addEventListener('click', (event) => {
@@ -281,7 +281,6 @@ function fetchGet() {
             }
           })
           renderComments();
-          console.log(comments)
           const span = containerElement.querySelector("span");
           span.remove();
     } )
@@ -290,8 +289,8 @@ function fetchGet() {
 
 fetchGet();
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-;
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const initLikeButton = () => {
   const likeButtonElements = document.querySelectorAll('.like-button');
   for (const likeButton of likeButtonElements) {
@@ -385,9 +384,6 @@ function fetchPost() {
   })
     .then(() => {
       fetchGet();
-      }).then().finally(() => {
-      isLoading = false;
-      showLoading();
       })
   }
 
