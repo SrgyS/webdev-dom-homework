@@ -84,10 +84,8 @@
   const containerElement = document.querySelector('.container');
 
   const showLoading = () => { 
-    // if(isLoading) {
       addCommentFormEl.style.display = 'none';
-      loadingEl.style.display = 'block';
-      // } else return
+      loadingEl.style.display = 'block'; 
   }
 
     // const date = () => {
@@ -175,12 +173,9 @@ const initEditButtons = () => {
         const newTextElement = document.querySelector('#new-text')
         const newText = newTextElement.value;
         comment.text = newText;
-        commentBodyElements[index].innerHTML = `<div class="comment-text">
-                                                  ${comment.text}
-                                                </div>`;
-        editButton.textContent = 'Редактировать';
-        comment.isEdit = false;
         
+   
+                                      
         fetch('https://webdev-hw-api.vercel.app/api/v1/sergei-stepanov/comments', {
           method: 'POST',
           body: JSON.stringify(
@@ -195,6 +190,18 @@ const initEditButtons = () => {
         }).then(() => {
               fetchGet();
               })
+              .then(()=>{
+                commentBodyElements[index].innerHTML = `<div class="comment-text">
+                                                  ${comment.text}
+                                                </div>`;
+        editButton.textContent = 'Редактировать';
+        comment.isEdit = false;
+      })
+              .catch((error)=>{
+        alert ('Кажется, у вас сломался интернет, попробуйте позже');
+        return;
+      })
+        
                 } else {                 
                     editButton.textContent = 'Сохранить';
                     comment.isEdit = true;
@@ -264,16 +271,10 @@ function fetchGet() {
     })
       .then((responseData) => {
         comments = responseData.comments.map((comment) => {
-          const dateOptions = { 
-            day: 'numeric', 
-            month: 'numeric', 
-            year: 'numeric',
-            hour: 'numeric', 
-            minute: 'numeric',
-            };
             return {
               name: comment.author.name,
-              date: new Date(comment.date).toLocaleString('ru-RU', dateOptions).replace(',', ''),
+              date: new Date(comment.date).toLocaleString().slice(0, -3).replace(',', ''),
+              // ('ru-RU', dateOptions).replace(',', ''),
               text: comment.text,
               likeCounter: comment.likes,
               likeButton: comment.isLiked,
@@ -366,32 +367,61 @@ const renderComments = () => {
       addCommentFormEl.style.display = 'flex';
       loadingEl.style.display = 'none';
   }
+
+  
 function fetchPost() {
 
   fetch('https://webdev-hw-api.vercel.app/api/v1/sergei-stepanov/comments', {
     method: 'POST',
-    body: JSON.stringify(
-      {
+    body: JSON.stringify({
        text: textInputElement.value
-                              .replaceAll('<', '&lt')
-                              .replaceAll('>', '&gt')
-                              .replaceAll('QUOTE_BEGIN', '<div class="quote">')
-                              .replaceAll('QUOTE_END', '</div>'),
+             .replaceAll('<', '&lt')
+             .replaceAll('>', '&gt')
+             .replaceAll('QUOTE_BEGIN', '<div class="quote">')
+             .replaceAll('QUOTE_END', '</div>'),
         name: nameInputElement.value
                               .replaceAll('<', '&lt')
                               .replaceAll('>', '&gt'),
+                              forceError: true,
        })
-  })
-    .then(() => {
+  })    
+    .then((response) => {
+      if (response.status === 400) {
+        throw new Error('400');
+      }
+      if (response.status === 500) {
+
+        throw new Error('Сервер сломался');
+      }
       fetchGet();
       })
+      .catch((error)=>{
+       if (error.message === '400') {
+        alert ('Имя и комментарий должны быть не короче 3 символов');
+       }
+       else if (error.message === 'Сервер сломался') {
+        console.log('Сервер сломался')
+         buttonElement.click();
+      }
+      else {
+        alert ('Кажется, у вас сломался интернет, попробуйте позже');
+          }
+          addCommentFormEl.style.display = 'flex';
+          loadingEl.style.display = 'none';
+          const spanElement = listElement.lastChild;
+          spanElement.remove();
+        })
   }
+  
+    
+  
 
 buttonElement.addEventListener("click", () => {
   isLoading = true;
   listElement.insertAdjacentHTML("beforeend", "<span>Комментарий загружается...</span>")
-  showLoading();
+  
   fetchPost();
+  showLoading();
   // fetch('https://webdev-hw-api.vercel.app/api/v1/sergei-stepanov/comments', {
   //   method: 'POST',
   //   body: JSON.stringify(
@@ -411,7 +441,8 @@ buttonElement.addEventListener("click", () => {
   //   })
   // })
   })
-document.addEventListener("keyup", (e)=> {
+
+  document.addEventListener("keyup", (e)=> {
  if (e.code == 'Enter') {
   // addComment();
   // renderComments();
