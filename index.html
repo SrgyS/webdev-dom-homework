@@ -75,7 +75,7 @@
     const nameInputElement = document.getElementById('input-name');
     const textInputElement = document.getElementById('input-text');
     const buttonDeleteElement = document.getElementById('button-delete');
-    
+  
     
     const date = () => {
       let currentDate = new Date();
@@ -113,7 +113,7 @@ function validateForm(){
 
   nameInputElement.addEventListener("input", validateForm);
   textInputElement.addEventListener("input", validateForm);
-  
+
 // function addComment(){
 //   const oldListHtml = listElement.innerHTML;
 //   listElement.innerHTML = oldListHtml +  
@@ -142,15 +142,6 @@ function validateForm(){
 // }
 
 
-
-document.addEventListener("keyup", (e)=> {
- if (e.code == 'Enter') {
-  addComment();
-  renderComments();
- }
-});
-
-buttonDeleteElement.addEventListener("click", ()=>{
   // const lastComment = listElement.innerHTML.lastIndexOf('<li class="comment">');
   // listElement.innerHTML = listElement.innerHTML.slice(0, lastComment);
 comments.pop();
@@ -166,9 +157,6 @@ const initEditButtons = () => {
     editButton.addEventListener('click', () => {
       const comment = comments[index];
 
-      if (comment.isEdit) {
-
-        const newText = document.querySelector('#new-text').value;
         comment.text = newText;
         commentBodyElements[index].innerHTML = `<div class="comment-text">
                                                   ${comment.text}
@@ -176,39 +164,13 @@ const initEditButtons = () => {
         editButton.textContent = 'Редактировать';
         comment.isEdit = false;
 
-      } else {
-        editButton.textContent = 'Сохранить';
-        comment.isEdit = true;
-        commentBodyElements[index].innerHTML = `<textarea
                                                   type="textarea"
                                                   class="add-form-text"
                                                   id="new-text"
-                                                  rows="4"
-                                                >${comment.text}</textarea>`
-      };  
-    });
-  });
-};
 
 // ----------------------- HW 10 -------------------------------
 
-const comments = [ {
-  name: 'Глеб Фокин',
-  text: 'Это будет первый комментарий на этой странице',
-  date: '12.02.22 12:18',
-  likeCounter: '3',
-  likeButton: '',
-  isEdit: false,
-},
-{
-  name: 'Варвара Н.',
-  text: 'Мне нравится как оформлена эта страница! ❤',
-  date: '13.02.22 19:22',
-  likeCounter: '75',
-  likeButton: '-active-like',
-  isEdit: false,
-},
-];
+
 
 const initLikeButton = () => {
   const likeButtonElements = document.querySelectorAll('.like-button');
@@ -224,23 +186,7 @@ const initLikeButton = () => {
      }  else {
       comments[index].likeButton = '-active-like';
      comments[index].likeCounter++;
-     }
-     renderComments();   
-  })
-    }
-  }
 
-
-
-const addComment = () => comments.push( 
-  {
-    name: nameInputElement.value,
-    text: textInputElement.value,
-    date: date(),
-    likeCounter: '0',
-    likeButton: '',
-    isEdit: false,
-  });
 
 const renderComments = () => {
   const commentsHTML = comments.map((comment, index) => {
@@ -273,14 +219,7 @@ const renderComments = () => {
       initLikeButton();
       
   }
-  
 
-buttonElement.addEventListener("click", () => {
-  addComment();
-  renderComments();
-});
-
-  renderComments();
 
   </script>
 </html>
