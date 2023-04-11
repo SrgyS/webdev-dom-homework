@@ -62,7 +62,6 @@ body {
 
   .comment-text {
     font-size: 32px;
-    white-space: pre-line;
   }
 
   .likes {
@@ -135,40 +134,5 @@ body {
 
   .add-form-button:hover {
     opacity: 0.9;
-  }
-  .quote {
-    background-color: rgb(250, 250, 249);
-    color: black;
-    font-size: 16px;
-    font-family: Helvetica;
-    border-radius: 8px;
-    border: none;
-    padding: 10px 20px;
-    margin-bottom: 20px;
-  }
-  .loading img{
-    width: 20px;
-    height: 20px;
-  }
-  .loading {
-    display: none;
-  }
 
-  @keyframes rotating {
-    from {
-      transform: rotate(0deg);
-    }
-    25% {
-      transform: rotate(30deg);;
-    }
-    75% {
-      transform: rotate(-30deg);;
-    }
-    to {
-      transform: rotate(0deg);
-    }
-  }
-
-  .-loading-like {
-    animation: rotating 2s linear infinite;
   }
